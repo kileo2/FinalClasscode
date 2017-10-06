@@ -34,4 +34,3 @@ log = function (message, level) {
 };
 
 exports.log = log;
-    
