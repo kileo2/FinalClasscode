@@ -1,0 +1,4 @@
+{"level":"info","message":"Loading Mongoose functionality","timestamp":"2017-10-15T18:34:35.015Z"}
+{"level":"info","message":"Starting application","timestamp":"2017-10-15T18:34:35.073Z"}
+{"level":"info","message":"HTTP Server listening on port: 5000 developmentlocalhost:5000","timestamp":"2017-10-15T18:34:35.084Z"}
+{"level":"info","message":"Mongoose connected to the database","timestamp":"2017-10-15T18:34:35.110Z"}

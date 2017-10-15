@@ -1,0 +1,8 @@
+{"level":"info","message":"Starting application","timestamp":"2017-10-09T18:14:45.855Z"}
+{"level":"info","message":"HTTP Server listening on port: 4000 testlocalhost:4000","timestamp":"2017-10-09T18:14:45.927Z"}
+{"level":"info","message":"Starting application","timestamp":"2017-10-09T18:18:04.397Z"}
+{"level":"info","message":"HTTP Server listening on port: 4000 testlocalhost:4000","timestamp":"2017-10-09T18:18:04.451Z"}
+{"level":"info","message":"Starting application","timestamp":"2017-10-09T22:17:42.663Z"}
+{"level":"info","message":"HTTP Server listening on port: 5000 developmentlocalhost:5000","timestamp":"2017-10-09T22:17:42.682Z"}
+{"level":"info","message":"Starting application","timestamp":"2017-10-09T22:18:04.453Z"}
+{"level":"info","message":"HTTP Server listening on port: 4000 testlocalhost:4000","timestamp":"2017-10-09T22:18:04.529Z"}

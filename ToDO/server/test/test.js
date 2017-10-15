@@ -26,6 +26,15 @@ describe('Test', function() {
           });
   });
 
+  it('it should return 404', (done) => {
+	chai.request(server)		.get('/index2.html')
+		.end((err, res) => {
+			res.should.have.status(404);
+		done();
+		});
+});
+
+
   describe('/GET users', () => {
 	it('it should GET all the users', (done) => {
 		chai.request(server)
