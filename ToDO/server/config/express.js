@@ -35,59 +35,70 @@ app.use(bodyParser.urlencoded({
     extended: true
   }));
 
-  var users = [	{name: 'John', email: 'woo@hoo.com'},
-  {name: 'Betty', email: 'loo@woo.com'},
-  {name: 'Hal', email: 'boo@woo.com'}
-];
+//   var users = [	{name: 'John', email: 'woo@hoo.com'},
+//   {name: 'Betty', email: 'loo@woo.com'},
+//   {name: 'Hal', email: 'boo@woo.com'}
+// ];
 
-app.get('/api/users', function (req, res) {
-  res.status(200).json(users);
-}); 
+// app.get('/api/users', function (req, res) {
+//   res.status(200).json(users);
+// }); 
  
-app.get('/api/todo', function (req, res) {
-  res.status(200).json(todo);
-}); 
+// app.get('/api/todo', function (req, res) {
+//   res.status(200).json(todo);
+// }); 
 
 
-function One(req, res, next){
-	res.set('X-One','One');
-	next();
-}
+// function One(req, res, next){
+// 	res.set('X-One','One');
+// 	next();
+// }
 
-function Two(req, res, next){
-	res.set('X-Two','Two');
-	next();
-}
+// function Two(req, res, next){
+// 	res.set('X-Two','Two');
+// 	next();
+// }
 
-app.get('/', [One, Two], function(req, res){
-	res.send('Three');
-});
-
+// app.get('/', [One, Two], function(req, res){
+// 	res.send('Three');
+// });
+///loads schemas
 //require('../app/controllers/users')(app,config);
 var models = glob.sync(config.root + '/app/models/*.js');
 models.forEach(function (model) {
   require(model);
 });
-
+//loads controller files
 var controllers = glob.sync(config.root + '/app/controllers/*.js');
 controllers.forEach(function (controller) {
-  require(controller);
+  require(controller)(app, config);
 });
-
+//loads static route
 app.use(express.static(config.root + '/public'));
-
+//error handlers
   app.use(function (req, res) {
     res.type('text/plan');
     res.status(404);
     res.send('404 Not Found');
   });
 
-  app.use(function (err, req, res, next) {
+  /* app.use(function (err, req, res, next) {
     console.error(err.stack);
     res.type('text/plan');
     res.status(500);
     res.send('500 Sever Error');
+  }); */
+
+  app.use(function (err, req, res, next) {
+    //only there to test it
+    if(process.env.NODE_ENV !== 'test') {
+      console.error(err.stack);
+    }
+    res.type('text/plan');
+    res.status(500);
+    res.send('500 Sever Error');
   });
+  
 
   logger.log("Starting application");
 

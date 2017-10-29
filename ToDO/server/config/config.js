@@ -9,7 +9,7 @@ development: {
             port: 5000, 
             db: 'mongodb://127.0.0.1/todo-dev'
          
- },  
+ },  //stop here
  test: {
   root: rootPath,
   app: {      name: 'ToDo'    },

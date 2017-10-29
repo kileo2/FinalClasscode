@@ -9,7 +9,8 @@ var express = require('express'),
     var User = mongoose.model('User');
 
 module.exports = function (app, config) {
-	app.use('/api', router);
+    app.use('/api', router);
+    
     router.get('/users', function(req, res,next){
         logger.log('Get all users','verbose');
         var query = User.find()
@@ -27,7 +28,7 @@ module.exports = function (app, config) {
         });
     });
     
-    router.get('/user/:userId', function(req, res, next){
+    router.get('/users/:userId', function(req, res, next){
         logger.log('Get user' + req.params.id, 'verbose');
     
         User.findById(req.params.userId)
@@ -58,7 +59,7 @@ module.exports = function (app, config) {
   
     });
 
-    router.put('/user/:userId', function(req, res, next){
+    router.put('/users/:userId', function(req, res, next){
         logger.log('Update user' + req.params.id, 'verbose');
     
         User.findOneAndUpdate({_id: req.params.userId}, 		req.body, {new:true, multi:false})
@@ -72,7 +73,7 @@ module.exports = function (app, config) {
          
     
 
-    router.delete('/user/:userId', function(req, res, next){
+    router.delete('/users/:userId', function(req, res, next){
         logger.log('Delete user' + req.params.id, 'verbose');
     
         User.remove({ _id: req.params.userId })
