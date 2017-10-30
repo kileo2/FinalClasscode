@@ -12,7 +12,7 @@ module.exports = function (app, config) {//passes the express and the config obj
     
     router.get('/exam2', function(req, res,next){
         console.log('Get all documents','verbose');
-        var query = Newexam.find()
+        var query = Newexam.find()//creating a new query object with the newexam's find method
         .then(result => {
          	if(result && result.length) {
 			res.status(200).json(result);//will parse result data 
@@ -28,12 +28,12 @@ module.exports = function (app, config) {//passes the express and the config obj
     router.post('/exam2',function(req,res,next){
         console.log('Create document', 'verbose');
         var newexam = new Newexam(req.body);//creates a new exam model based on the data sent in the request
-        newexam.save()
+        newexam.save()//save the newexam and send back to the user if no error
         .then(result => {
             res.status(201).json(result);
         })
         .catch( err => {
-           return next(err);
+           return next(err);//send to error handlers
         });
   
     });

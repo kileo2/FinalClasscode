@@ -5,10 +5,10 @@ var bluebird = require('bluebird');//loads the code from bluebird and assigns it
 var glob = require('glob');//loads code from glob and assigns it to the variable
 
 
-module.exports = function (app, config) {
+module.exports = function (app, config) {//uses express and config objects
 
   console.log("Loading Mongoose functionality");
-  mongoose.Promise = require('bluebird');
+  mongoose.Promise = require('bluebird');//requiring the promise library called blulebird. All mongoose promises will be replaced by bluebird promise library
   mongoose.connect(config.db, {useMongoClient: true});
   var db = mongoose.connection;
   db.on('error', function () {
@@ -18,7 +18,7 @@ module.exports = function (app, config) {
   mongoose.set('debug', true);
   mongoose.connection.once('open', function callback() {
     console.log("Mongoose connected to the database");
-  });
+  });//will log all database accesses
 
   app.use(function (req, res, next) {
     console.log('Request from ' + req.connection.remoteAddress, 'info');
