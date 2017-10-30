@@ -3,7 +3,7 @@ var config = require('./config/config');//This is assigning a variable config to
 
 var app = express();//The app object implements the server in express
 
-require('./config/express')(app, config);
+require('./config/express')(app, config);//loads the server configuration code and passes the app and config object to it
 
 console.log('info',"Creating HTTP server on port: %s", config.port);//Prints to the console which port the server is listening on
 require('http').createServer(app).listen(config.port, function () {//turns on the server at that port number

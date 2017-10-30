@@ -1,8 +1,8 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var bluebird = require('bluebird');
-var glob = require('glob');
+var express = require('express');//loads the code from the module express and assigns it to the variable
+var bodyParser = require('body-parser');//loads the code from the module body parser and assigns it to the variable
+var mongoose = require('mongoose');//loads the code from the module mongoose and assigns it to the variable
+var bluebird = require('bluebird');//loads the code from bluebird and assigns it to the variable
+var glob = require('glob');//loads code from glob and assigns it to the variable
 
 
 module.exports = function (app, config) {
@@ -23,14 +23,14 @@ module.exports = function (app, config) {
   app.use(function (req, res, next) {
     console.log('Request from ' + req.connection.remoteAddress, 'info');
     next();
-  });
+  });//prints where the request is coming from to the console.
   
-
+//parses the text that was included for the post. 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
   }));
-
+//loads models files first before controllers
   var models = glob.sync(config.root + '/app/models/*.js');
   models.forEach(function (model) {
     require(model);
@@ -60,5 +60,5 @@ app.use(bodyParser.urlencoded({
     res.send('500 Sever Error');
   });// Process incoming requests. it can complete successfully or move to next middleware or give a 500 error.
 
-  console.log("Starting application");
+  console.log("Starting application");//starts application and prints it to console.
 }
