@@ -22,33 +22,10 @@ export class List {
     await this.todos.getUserTodos(this.user._id);
   }
 
-  async saveTodo(){
-            if(this.todoObj){       
-                let response = await this.todos.save(this.todoObj);
-                if(response.error){
-                    alert("There was an error creating the ToDo");
-                } else {
-                    var todoId = response._id;
-                    if(this.filesToUpload && this.filesToUpload.length){
-                        await this.todos.uploadFile(this.filesToUpload, this.user._id, todoId);
-                        this.filesToUpload = [];
-                    }
-                }
-                this.showList = true;
-            }
-        }
-    
-    
-  // constructor(todos, auth){
-  // 	this.todos = todos;
-  // 	this.auth = auth;
-
-  // 	this.user = JSON.parse(sessionStorage.getItem('user'));
-  // 	this.title = "Ross Has Things ToDo!"
-  // 	this.editTodoForm = false;
-  // 	this.showCompleted = false;
-  // 	this.priorities = ['Low', 'Medium', 'High', 'Critical'];
-  // }
+  logout() {
+    sessionStorage.removeItem('user');
+    this.auth.logout();
+  }
 
   createTodo() {
     this.todoObj = {
@@ -86,14 +63,37 @@ export class List {
   }
 
 
+  async saveTodo(){
+            if(this.todoObj){       
+                let response = await this.todos.save(this.todoObj);
+                if(response.error){
+                    alert("There was an error creating the ToDo");
+                } else {
+                    var todoId = response._id;
+                    if(this.filesToUpload && this.filesToUpload.length){
+                        await this.todos.uploadFile(this.filesToUpload, this.user._id, todoId);
+                        this.filesToUpload = [];
+                    }
+                }
+                this.showList = true;
+            }
+        }
+    
+    
+  // constructor(todos, auth){
+  // 	this.todos = todos;
+  // 	this.auth = auth;
+
+  // 	this.user = JSON.parse(sessionStorage.getItem('user'));
+  // 	this.title = "Ross Has Things ToDo!"
+  // 	this.editTodoForm = false;
+  // 	this.showCompleted = false;
+  // 	this.priorities = ['Low', 'Medium', 'High', 'Critical'];
+  // }
+
 
   back() {
     this.showList = false;
-  }
-
-  logout() {
-    sessionStorage.removeItem('user');
-    this.auth.logout();
   }
 
 back(){

@@ -1,4 +1,14 @@
 <template>
+		<head><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+			<style type="text/css">
+			body{ margin:0;
+							padding:0;
+							background: url('http://www.publicdomainpictures.net/pictures/220000/velka/open-blank-notebook-black-amp-white.jpg') no-repeat center fixed;
+													
+	
+	
+			}
+</style>	
 	<h1>${message}</h1>
 	 <compose show.bind="showList" view="./components/todoList.html"></compose>
 	    <compose show.bind="!showList" view="./components/todoForm.html"></compose>

@@ -22,6 +22,8 @@ var logDir = 'log';
 new (require('winston-daily-rotate-file'))({
                 name: 'logFile',
                 filename: `${logDir}/-results.log`,
+                timestamp: tsFormat,
+                datePattern: 'yyyy-MM-dd',
                 prepend: true,
                 level: env === 'development' ? 'verbose' : 'info'
             })

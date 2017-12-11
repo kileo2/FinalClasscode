@@ -13,7 +13,7 @@ export class ToDos {
     
 
     async getUserTodos(id) {
-        let response = await this.data.get(this.TODO_SERVICE + "/" + id);
+        let response = await this.data.get(this.TODO_SERVICE + "/user/" + id);
         if (!response.error && !response.message) {
             this.todosArray = response;
         }
@@ -21,17 +21,17 @@ export class ToDos {
     async save(todo) {
         if (todo) {
             if (!todo._id) {
-                let serverResponse = await this.data.post(todo, this.TODOS_SERVICE + "/" + todo._id);
+                let serverResponse = await this.data.post(todo, this.TODO_SERVICE);
                 if (!serverResponse.error) {
                     this.todosArray.push(serverResponse);
                 }
-                return response;
+                return serverResponse;
             } else {
-                let response = await this.data.put(todo, this.TODOS_SERVICE + "/" + todo._id);
-                if (!response.error) {
+                let serverResponse = await this.data.put(todo, this.TODO_SERVICE + "/" + todo._id);
+                if (!serverResponse.error) {
                     // this.updateArray(response);
                 }
-                return response;
+                return serverResponse;
             }
         }
     }
@@ -48,7 +48,7 @@ export class ToDos {
         
 
     async deleteTodo(id){
-		let response = await this.data.delete(this.TODOS_SERVICE + "/" + id);
+		let response = await this.data.delete(this.TODO_SERVICE + "/" + id);
 		if(!response.error){
 			for(let i = 0; i < this.todosArray.length; i++){
 				if(this.todosArray[i]._id === id){

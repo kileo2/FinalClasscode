@@ -8,9 +8,10 @@ var todosschema = new Schema({
     todo: { type: String, required:true},
     description:{type:String},
     dateCreated: {type: Date, default:Date.now},
+    priority:{type:String},
     dateDue :{ type:Date, default:Date.now},
     completed: { type: Boolean, default: false },
-    file: {filename:String, originalName:String,dateUploaded:Date}
+    file: {fileName:String, originalName:String,dateUploaded:Date}
 });
 
 module.exports = 
