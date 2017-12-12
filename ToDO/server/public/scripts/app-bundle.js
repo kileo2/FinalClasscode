@@ -270,7 +270,7 @@ define('modules/list',['exports', 'aurelia-framework', 'aurelia-router', 'aureli
 
   var _dec, _class;
 
-  var List = exports.List = (_dec = (0, _aureliaFramework.inject)(_todos.ToDos, _aureliaAuth.AuthService), _dec(_class = function () {
+  var List = exports.List = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router, _aureliaAuth.AuthService, _todos.ToDos), _dec(_class = function () {
     function List(router, auth, todos) {
       _classCallCheck(this, List);
 
@@ -307,6 +307,50 @@ define('modules/list',['exports', 'aurelia-framework', 'aurelia-router', 'aureli
 
       return activate;
     }();
+
+    List.prototype.logout = function logout() {
+      sessionStorage.removeItem('user');
+      this.auth.logout();
+    };
+
+    List.prototype.createTodo = function createTodo() {
+      this.todoObj = {
+        todo: "",
+        description: "",
+        dateDue: new Date(),
+        userId: this.user._id,
+        priority: this.priorities[0]
+      };
+      this.showList = false;
+    };
+
+    List.prototype.editTodo = function editTodo(todo) {
+      this.todoObj = todo;
+      this.showList = false;
+    };
+
+    List.prototype.deleteTodo = function deleteTodo(todo) {
+      this.todos.deleteTodo(todo._id);
+    };
+
+    List.prototype.completeTodo = function completeTodo(todo) {
+      todo.completed = !todo.completed;
+      this.todoObj = todo;
+      this.saveTodo();
+    };
+
+    List.prototype.toggleShowCompleted = function toggleShowCompleted() {
+      this.showCompleted = !this.showCompleted;
+    };
+
+    List.prototype.changeFiles = function changeFiles() {
+      this.filesToUpload = new Array();
+      this.filesToUpload.push(this.files[0]);
+    };
+
+    List.prototype.removeFile = function removeFile(index) {
+      this.filesToUpload.splice(index, 1);
+    };
 
     List.prototype.saveTodo = function () {
       var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2() {
@@ -367,52 +411,12 @@ define('modules/list',['exports', 'aurelia-framework', 'aurelia-router', 'aureli
       return saveTodo;
     }();
 
-    List.prototype.createTodo = function createTodo() {
-      this.todoObj = {
-        todo: "",
-        description: "",
-        dateDue: new Date(),
-        userId: this.user._id,
-        priority: this.priorities[0]
-      };
-      this.showList = false;
-    };
-
-    List.prototype.editTodo = function editTodo(todo) {
-      this.todoObj = todo;
-      this.showList = false;
-    };
-
-    List.prototype.deleteTodo = function deleteTodo(todo) {
-      this.todos.deleteTodo(todo._id);
-    };
-
-    List.prototype.completeTodo = function completeTodo(todo) {
-      todo.completed = !todo.completed;
-      this.todoObj = todo;
-      this.saveTodo();
-    };
-
-    List.prototype.toggleShowCompleted = function toggleShowCompleted() {
-      this.showCompleted = !this.showCompleted;
-    };
-
-    List.prototype.changeFiles = function changeFiles() {
-      this.filesToUpload = new Array();
-      this.filesToUpload.push(this.files[0]);
-    };
-
-    List.prototype.removeFile = function removeFile(index) {
-      this.filesToUpload.splice(index, 1);
-    };
-
     List.prototype.back = function back() {
       this.showList = false;
     };
 
-    List.prototype.logout = function logout() {
-      sessionStorage.removeItem('user');
-      this.auth.logout();
+    List.prototype.back = function back() {
+      this.showList = true;
     };
 
     return List;
@@ -426,7 +430,7 @@ define('resources/index',['exports'], function (exports) {
   });
   exports.configure = configure;
   function configure(config) {
-    config.globalResources(['./value-converters/date-format']);
+    config.globalResources(['./value-converters/date-format', './value-converters/completed', './elements/flatpickr']);
   }
 });
 define('resources/data/data-services',['exports', 'aurelia-framework', 'aurelia-fetch-client'], function (exports, _aureliaFramework, _aureliaFetchClient) {
@@ -463,6 +467,8 @@ define('resources/data/data-services',['exports', 'aurelia-framework', 'aurelia-
                     }
                 }).withInterceptor({
                     request: function request(_request) {
+                        var authHeader = 'Bearer ' + localStorage.getItem('aurelia_token');
+                        _request.headers.append('Authorization', authHeader);
                         console.log('Requesting ' + _request.method + ' ' + _request.url);
                         return _request;
                     },
@@ -628,7 +634,7 @@ define('resources/data/todos',['exports', 'aurelia-framework', './data-services'
 
         ToDos.prototype.save = function () {
             var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(todo) {
-                var serverResponse, _response;
+                var serverResponse, _serverResponse;
 
                 return regeneratorRuntime.wrap(function _callee2$(_context2) {
                     while (1) {
@@ -645,7 +651,7 @@ define('resources/data/todos',['exports', 'aurelia-framework', './data-services'
                                 }
 
                                 _context2.next = 4;
-                                return this.data.post(todo, this.TODOS_SERVICE + "/" + todo._id);
+                                return this.data.post(todo, this.TODO_SERVICE);
 
                             case 4:
                                 serverResponse = _context2.sent;
@@ -653,17 +659,17 @@ define('resources/data/todos',['exports', 'aurelia-framework', './data-services'
                                 if (!serverResponse.error) {
                                     this.todosArray.push(serverResponse);
                                 }
-                                return _context2.abrupt('return', response);
+                                return _context2.abrupt('return', serverResponse);
 
                             case 9:
                                 _context2.next = 11;
-                                return this.data.put(todo, this.TODOS_SERVICE + "/" + todo._id);
+                                return this.data.put(todo, this.TODO_SERVICE + "/" + todo._id);
 
                             case 11:
-                                _response = _context2.sent;
+                                _serverResponse = _context2.sent;
 
-                                if (!_response.error) {}
-                                return _context2.abrupt('return', _response);
+                                if (!_serverResponse.error) {}
+                                return _context2.abrupt('return', _serverResponse);
 
                             case 14:
                             case 'end':
@@ -723,7 +729,7 @@ define('resources/data/todos',['exports', 'aurelia-framework', './data-services'
                         switch (_context4.prev = _context4.next) {
                             case 0:
                                 _context4.next = 2;
-                                return this.data.delete(this.TODOS_SERVICE + "/" + id);
+                                return this.data.delete(this.TODO_SERVICE + "/" + id);
 
                             case 2:
                                 response = _context4.sent;
@@ -844,6 +850,117 @@ define('resources/data/users',['exports', 'aurelia-framework', './data-services'
         return Users;
     }()) || _class);
 });
+define('resources/elements/flatpickr',['exports', 'aurelia-framework', 'flatpickr'], function (exports, _aureliaFramework, _flatpickr) {
+    'use strict';
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.FlatPickerCustomElement = undefined;
+
+    var _flatpickr2 = _interopRequireDefault(_flatpickr);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _initDefineProp(target, property, descriptor, context) {
+        if (!descriptor) return;
+        Object.defineProperty(target, property, {
+            enumerable: descriptor.enumerable,
+            configurable: descriptor.configurable,
+            writable: descriptor.writable,
+            value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+        });
+    }
+
+    function _classCallCheck(instance, Constructor) {
+        if (!(instance instanceof Constructor)) {
+            throw new TypeError("Cannot call a class as a function");
+        }
+    }
+
+    function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+        var desc = {};
+        Object['ke' + 'ys'](descriptor).forEach(function (key) {
+            desc[key] = descriptor[key];
+        });
+        desc.enumerable = !!desc.enumerable;
+        desc.configurable = !!desc.configurable;
+
+        if ('value' in desc || desc.initializer) {
+            desc.writable = true;
+        }
+
+        desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+            return decorator(target, property, desc) || desc;
+        }, desc);
+
+        if (context && desc.initializer !== void 0) {
+            desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+            desc.initializer = undefined;
+        }
+
+        if (desc.initializer === void 0) {
+            Object['define' + 'Property'](target, property, desc);
+            desc = null;
+        }
+
+        return desc;
+    }
+
+    function _initializerWarningHelper(descriptor, context) {
+        throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
+    }
+
+    var _dec, _dec2, _class, _desc, _value, _class2, _descriptor;
+
+    var FlatPickerCustomElement = exports.FlatPickerCustomElement = (_dec = (0, _aureliaFramework.inject)(Element), _dec2 = (0, _aureliaFramework.bindable)({ defaultBindingMode: _aureliaFramework.bindingMode.twoWay }), _dec(_class = (_class2 = function () {
+        function FlatPickerCustomElement(element) {
+            _classCallCheck(this, FlatPickerCustomElement);
+
+            _initDefineProp(this, 'value', _descriptor, this);
+
+            this.element = element;
+        }
+
+        FlatPickerCustomElement.prototype.bind = function bind() {
+            var defaultConfig = {
+                altInput: true,
+                altFormat: "F j, Y",
+                wrap: true
+            };
+            this._config = Object.assign({}, defaultConfig);
+            this._config.onChange = this._config.onMonthChange = this._config.onYearChange = this.onChange.bind(this);
+        };
+
+        FlatPickerCustomElement.prototype.attached = function attached() {
+            this.flatpickr = new _flatpickr2.default(this.element.querySelector('.aurelia-flatpickr'), this._config);
+        };
+
+        FlatPickerCustomElement.prototype.onChange = function onChange(selectedDates, dateStr, instance) {
+            this.value = selectedDates[0];
+        };
+
+        FlatPickerCustomElement.prototype.valueChanged = function valueChanged() {
+            if (!this.flatpickr) {
+                return;
+            }
+            if (this.value === this.flatpickr.selectedDates[0]) {
+                return;
+            }
+            var newDate = this.value ? this.value : undefined;
+            this.flatpickr.setDate(newDate);
+        };
+
+        return FlatPickerCustomElement;
+    }(), (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'value', [_dec2], {
+        enumerable: true,
+        initializer: null
+    })), _class2)) || _class);
+});
 define('resources/value-converters/completed',["exports"], function (exports) {
     "use strict";
 
@@ -913,17 +1030,13 @@ define('resources/value-converters/date-format',['exports', 'moment'], function 
 		return DateFormatValueConverter;
 	}();
 });
-define('resources/elements/flatpickr',[], function () {
-  "use strict";
-});
-define('text!app.html', ['module'], function(module) { module.exports = "<template><router-view></router-view></template>"; });
+define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"resources/css/styles.css\"></require><router-view></router-view></template>"; });
 define('text!resources/css/styles.css', ['module'], function(module) { module.exports = ".rightMargin {\n        margin-right: 10px;\n    }\n    "; });
-define('text!modules/home.html', ['module'], function(module) { module.exports = "<template><nav class=\"navbar navbar-expand-lg navbar-light bg-light\"><a class=\"navbar-brand\" href=\"#\">Todo Lists</a> <button class=\"navbar-toggler\" type=\"button\" data-toggle=\"collapse\" data-target=\"#navbarSupportedContent\" aria-controls=\"navbarSupportedContent\" aria-expanded=\"false\" aria-label=\"Toggle navigation\"><span class=\"navbar-toggler-icon\"></span></button><div class=\"collapse navbar-collapse\" id=\"navbarSupportedContent\"><ul class=\"navbar-nav mr-auto\"><li class=\"nav-item active\"><a class=\"nav-link\" href=\"#\">Home <span class=\"sr-only\">(current)</span></a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"#\">Link</a></li><li class=\"nav-item dropdown\"><a class=\"nav-link dropdown-toggle\" href=\"#\" id=\"navbarDropdown\" role=\"button\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">Dropdown</a><div class=\"dropdown-menu\" aria-labelledby=\"navbarDropdown\"><a class=\"dropdown-item\" href=\"#\">Action</a> <a class=\"dropdown-item\" href=\"#\">Another action</a><div class=\"dropdown-divider\"></div><a class=\"dropdown-item\" href=\"#\">Something else here</a></div></li><li class=\"nav-item\"><a class=\"nav-link disabled\" href=\"#\">Disabled</a></li></ul><form class=\"form-inline my-2 my-lg-0\"><input class=\"form-control mr-sm-2\" type=\"search\" placeholder=\"Search\" aria-label=\"Search\"> <button class=\"btn btn-outline-success my-2 my-sm-0\" type=\"submit\">Search</button></form></div></nav><div class=\"“container”\">    <compose show.bind=\"showLogin\" view=\"./components/login.html\"></compose>    <compose show.bind=\"!showLogin\" view=\"./components/register.html\"></compose></div></template>"; });
-define('text!modules/list.html', ['module'], function(module) { module.exports = "<template><h1>${message}</h1> <compose show.bind=\"showList\" view=\"./components/todoList.html\"></compose>    <compose show.bind=\"!showList\" view=\"./components/todoForm.html\"></compose><button click.trigger=\"logout()\">Logout</button></template>"; });
-define('text!modules/components/login.html', ['module'], function(module) { module.exports = "<template><div class=\"card\" style=\"width:20rem\"><img class=\"card-img-top\" src=\"...\" alt=\"Card image cap\"><div class=\"card-body\"><div id=\"errorMsg\" innerhtml.bind=\"loginError\"></div>    <label for=\"email\">Email</label>    <input value.bind=\"email\" type=\"email\" autofocus class=\"form-control\" id=\"email\" placeholder=\"Email\">    <label for=\"password\">Password</label>    <input value.bind=\"password\" type=\"password\" class=\"form-control\" id=\"password\" placeholder=\"Password\">    <button click.trigger=\"login()\">Login</button>       <span class=\"registerLink\" click.trigger=\"showRegister()\">Register</span></div></div></template>"; });
+define('text!modules/home.html', ['module'], function(module) { module.exports = "<template><head><link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\"><style type=\"text/css\">body{margin:0;padding:0;background:url(http://www.publicdomainpictures.net/pictures/220000/velka/open-blank-notebook-black-amp-white.jpg) no-repeat center fixed}.h1{color:#fff;margin-top:100px;margin-bottom:100px;margin-right:150px;margin-left:80px}</style></head><h1>Items to Do Login</h1><body><div class=\"“container”\">    <compose show.bind=\"showLogin\" view=\"./components/login.html\"></compose>    <compose show.bind=\"!showLogin\" view=\"./components/register.html\"></compose></div></body></template>"; });
+define('text!modules/list.html', ['module'], function(module) { module.exports = "<template><head><link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\"><style type=\"text/css\">body{margin:0;padding:0;background:url(http://www.publicdomainpictures.net/pictures/220000/velka/open-blank-notebook-black-amp-white.jpg) no-repeat center fixed}</style><h1>${message}</h1> <compose show.bind=\"showList\" view=\"./components/todoList.html\"></compose>    <compose show.bind=\"!showList\" view=\"./components/todoForm.html\"></compose><button click.trigger=\"logout()\">Logout</button></head></template>"; });
+define('text!modules/components/login.html', ['module'], function(module) { module.exports = "<template><head><link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\"><style type=\"text/css\">.card-img-overlay{margin:0 auto;float:none;top:30%}.card-img-top{font-weight:700;margin-left:10px}</style></head><div class=\"card-img-overlay\" style=\"width:40rem\"><img class=\"card-img-top\" src=\"...\" alt=\"Login\"><div class=\"card-body\"><div id=\"errorMsg\" innerhtml.bind=\"loginError\"></div>    <label for=\"email\">Email</label>    <input value.bind=\"email\" type=\"email\" autofocus class=\"form-control\" id=\"email\" placeholder=\"Email\">    <label for=\"password\">Password</label>    <input value.bind=\"password\" type=\"password\" class=\"form-control\" id=\"password\" placeholder=\"Password\">    <button click.trigger=\"login()\">Login</button>       <span class=\"registerLink\" click.trigger=\"showRegister()\">Register</span></div></div></template>"; });
 define('text!modules/components/register.html', ['module'], function(module) { module.exports = "<template>First Name: <input value.bind=\"user.firstName\">     Last Name: <input value.bind=\"user.lastName\">     Email: <input value.bind=\"user.email\">     Password: <input value.bind=\"user.password\">     <button click.trigger=\"save()\">Save</button></template>"; });
-define('text!modules/components/todoForm.html', ['module'], function(module) { module.exports = "<template><div class=\"card topMargin\"><div class=\"card-body\"><span><i click.trigger=\"back()\" class=\"fa fa-arrow-left fa-lg\" aria-hidden=\"true\"></i></span></div></div><form><div class=\"form-group topMargin\"><label for=\"todoInput\">Todo *</label><input value.bind=\"todoObj.todo\" type=\"text\" class=\"form-control\" id=\"todoInput\" aria-describedby=\"todoHelp\" placeholder=\"Enter ToDo\"> <small id=\"todoHelp\" class=\"form-text text-muted\">A short name for the ToDo.</small></div>        <div class=\"form-group\">            <label for=\"descriptionInput\">Description</label>            <textarea value.bind=\"todoObj.description\" type=\"text\" class=\"form-control\" id=\"descriptionInput\" aria-describedby=\"descriptionHelp\" placeholder=\"Enter Description\"></textarea>            <small id=\"descriptionHelp\" class=\"form-text text-muted\">A longer description if required.</small>         </div><div class=\"form-group\">            <label for=\"priorityInput\">Priority</label>            <select value.bind=\"todoObj.priority\" class=\"form-control\" id=\"exampleFormControlSelect2\">                <option repeat.for=\"priority of priorities\" value.bind=\"priority\"> ${priority}</option>            </select>            <small id=\"priorityHelp\" class=\"form-text text-muted\">How urgent is this?</small>         </div>               <div class=\"form-group\">            <label for=\"dueDateInput\">Due Date *</label>            <input type=\"date\" class=\"form-control\" value.bind=\"todoObj.dateDue\">             <small id=\"dueDateHelp\" class=\"form-text text-muted\">The date to ToDo is due.</small>         </div>           <button click.trigger=\"saveTodo()\" class=\"btn btn-primary topMargin\">Save</button>     </form></template><div class=\"row\"><div class=\"col\"><label class=\"btn btn-secondary\">Browse for files&hellip; <input type=\"file\" style=\"display:none\" change.delegate=\"changeFiles()\" files.bind=\"files\"></label><small id=\"fileHelp\" class=\"form-text text-muted\">Upload any files that will be useful.</small></div><div class=\"col-8\"><ul><li repeat.for=\"file of filesToUpload\" class=\"list-group-item\"> ${file.name}<span click.delegate=\"removeFile($index)\" class=\"pull-right\"><i class=\"fa fa-trash\" aria-hidden=\"true\"></i></span></li></ul></div></div>"; });
-define('text!modules/components/todoList.html', ['module'], function(module) { module.exports = "<template><script src=\"https://use.fontawesome.com/c00bf32c05.js\"></script>    <div class=\"card topMargin\">        <div class=\"card-body\">            <div class=\"row\"><span class=\"col\">        <div class=\"form-check\">            <label class=\"form-check-label\">                <input change.trigger=\"toggleShowCompleted()\" type=\"checkbox\" class=\"form-check-input\">                 Show completed             </label>        </div>    </span>                <span class=\"col\">                    <span class=\"rightMargin pull-right\"><i click.trigger=\"logout()\" class=\"fa fa-sign-out fa-lg\" aria-hidden=\"true\"></i></span>                     <span class=\"rightMargin pull-right\"><i click.trigger=\"createTodo()\" class=\"fa fa-plus fa-lg\" aria-hidden=\"true\"></i></span>                 </span>            </div><div show.bind=\"todos.todosArray.length\"><table class=\"table\"><thead><tr><th>ToDo</th> <th>Due Date</th>  <th>Priority</th><th>File</th><th>Edit</th></tr></thead><tbody><tr class=\"${todo.priority === 'Critical' ? 'table-secondary' : ' '} \" repeat.for=\"todo of todos.todosArray | completed:showCompleted\"><th>${todo.todo}</th><td>${todo.dateDue | dateFormat}</td><td>${todo.priority}</td> <td><a href=\"http://localhost:5000/uploads/${user._id}/${todo.file.filename}\" target=\"_blank\">${todo.file.originalName}</a></td><td>            <i click.trigger=\"editTodo(todo)\" class=\"fa fa-pencil rightMargin\" aria-hidden=\"true\"></i> <i click.trigger=\"deleteTodo(todo)\" class=\"fa fa-trash rightMargin\" aria-hidden=\"true\"></i>    <i show.bind=\"!todo.completed\" click.trigger=\"completeTodo(todo)\" class=\"fa fa-square-o\" aria-hidden=\"true\"></i>     <i show.bind=\"todo.completed \" click.trigger=\"completeTodo(todo)\" class=\"fa fa-check\" aria-hidden=\"true \"></i></td></tr></tbody></table></div><div show.bind=\"!todos.todosArray.length\"><h2>Apparently, you don't have anything to do!</h2></div>        </div>    </div></template>"; });
-define('text!resources/elements/flatpicker.html', ['module'], function(module) { module.exports = ""; });
-define('text!resources/elements/flatpickr.html', ['module'], function(module) { module.exports = ""; });
+define('text!modules/components/todoForm.html', ['module'], function(module) { module.exports = "<template><head><link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\"><style type=\"text/css\">body{margin:0;padding:0;background:url(http://www.publicdomainpictures.net/pictures/220000/velka/open-blank-notebook-black-amp-white.jpg) no-repeat center fixed}.container{position:absolute;left:0;right:0;height:100%;width:100%;margin:auto}.card-img-overlay{margin:0 auto;float:none}</style><body><div class=\"container\"><div class=\"card-img-overlay\" style=\"width:50rem\"><div class=\"card topMargin\"><div class=\"card-body\"><span><i click.trigger=\"back()\" class=\"fa fa-arrow-left fa-lg\" aria-hidden=\"true\"></i></span></div></div><form><div class=\"form-group topMargin\"><label for=\"todoInput\">Todo *</label><input value.bind=\"todoObj.todo\" type=\"text\" class=\"form-control\" id=\"todoInput\" aria-describedby=\"todoHelp\" placeholder=\"Enter ToDo\"> <small id=\"todoHelp\" class=\"form-text text-muted\">A short name for the ToDo.</small></div><div class=\"form-group\"><label for=\"descriptionInput\">Description</label><textarea value.bind=\"todoObj.description\" type=\"text\" class=\"form-control\" id=\"descriptionInput\" aria-describedby=\"descriptionHelp\" placeholder=\"Enter Description\"></textarea><small id=\"descriptionHelp\" class=\"form-text text-muted\">A longer description if required.</small></div><div class=\"form-group\"><label for=\"priorityInput\">Priority</label><select value.bind=\"todoObj.priority\" class=\"form-control\" id=\"exampleFormControlSelect2\"><option repeat.for=\"priority of priorities\" value.bind=\"priority\"> ${priority}</option></select><small id=\"priorityHelp\" class=\"form-text text-muted\">How urgent is this?</small></div><div class=\"form-group\"><label for=\"dueDateInput\">Due Date *</label><flat-picker value.bind=\"todoObj.dateDue\"></flat-picker><small id=\"dueDateHelp\" class=\"form-text text-muted\">The date to ToDo is due.</small></div><button click.trigger=\"saveTodo()\" class=\"btn btn-primary topMargin\">Save</button></form><div class=\"row\"><div class=\"col\"><label class=\"btn btn-secondary\">Browse for files&hellip; <input type=\"file\" style=\"display:none\" change.delegate=\"changeFiles()\" files.bind=\"files\"></label><small id=\"fileHelp\" class=\"form-text text-muted\">Upload any files that will be useful.</small></div><div class=\"col-8\"><ul><li repeat.for=\"file of filesToUpload\" class=\"list-group-item\"> ${file.name} <span click.delegate=\"removeFile($index)\" class=\"pull-right\"><i class=\"fa fa-trash\" aria-hidden=\"true\"></i></span></li></ul></div></div></div></div></body></head></template>"; });
+define('text!modules/components/todoList.html', ['module'], function(module) { module.exports = "<template><head><link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\"><style type=\"text/css\">body{margin:0;padding:0;background:url(http://www.publicdomainpictures.net/pictures/220000/velka/open-blank-notebook-black-amp-white.jpg) no-repeat center fixed}.container{position:absolute;left:0;right:0;height:100%;width:100%;margin:auto}.rightMargin{margin-right:20px}</style><script src=\"https://use.fontawesome.com/c00bf32c05.js\"></script><body><div class=\"container\"><div class=\"card-img-overlay\"><div class=\"card topMargin\"><div class=\"card-body\"><div class=\"row\"><span class=\"col\"><div class=\"form-check\"><label class=\"form-check-label\"><input change.trigger=\"toggleShowCompleted()\" type=\"checkbox\" class=\"form-check-input\">                 Show completed</label></div></span><span class=\"col\"><span class=\"rightMargin pull-right\"><i click.trigger=\"logout()\" class=\"fa fa-sign-out fa-lg\" aria-hidden=\"true\"></i> </span><span class=\"rightMargin pull-right\"><i click.trigger=\"createTodo()\" class=\"fa fa-plus fa-lg\" aria-hidden=\"true\"></i></span></span></div><div show.bind=\"todos.todosArray.length\"><table class=\"table\"><thead><tr><th>ToDo</th><th>Due Date</th><th>Priority</th><th>File</th><th>Edit</th></tr></thead><tbody><tr class=\"${todo.priority === 'Critical' ? 'table-secondary' : ' '} \" repeat.for=\"todo of todos.todosArray | completed:showCompleted\"><th>${todo.todo}</th><td>${todo.dateDue | dateFormat}</td><td>${todo.priority}</td><td><a href=\"uploads/${user._id}/${todo.file.fileName}\" target=\"_blank\">${todo.file.originalName}</a></td><td><i click.trigger=\"editTodo(todo)\" class=\"fa fa-pencil rightMargin\" aria-hidden=\"true\"></i> <i click.trigger=\"deleteTodo(todo)\" class=\"fa fa-trash rightMargin\" aria-hidden=\"true\"></i> <i show.bind=\"!todo.completed\" click.trigger=\"completeTodo(todo)\" class=\"fa fa-square-o\" aria-hidden=\"true\"></i> <i show.bind=\"todo.completed \" click.trigger=\"completeTodo(todo)\" class=\"fa fa-check\" aria-hidden=\"true \"></i></td></tr></tbody></table></div><div show.bind=\"!todos.todosArray.length\"><h2>Apparently, you don't have anything to do!</h2></div></div></div></div></div></body></head></template>"; });
+define('text!resources/elements/flatpickr.html', ['module'], function(module) { module.exports = "<template>    <require from=\"flatpickr/flatpickr.css\"></require>    <div class=\"input-group aurelia-flatpickr\">        <input type=\"text\" class=\"aurelia-flatpickr form-control flatPicker\" data-input>     </div></template>"; });
 //# sourceMappingURL=app-bundle.js.map
